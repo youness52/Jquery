@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<!-- ================== BEGIN BASE CSS STYLE ================== -->
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+	<link href="../assets/css/default/app.min.css" rel="stylesheet" />
+	<!-- ================== END BASE CSS STYLE ================== -->
+	
+	<!-- ================== BEGIN PAGE LEVEL STYLE ================== -->
+	<link href="../assets/plugins/datatables.net-bs4/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
+	<link href="../assets/plugins/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css" rel="stylesheet" />
+	<link href="../assets/plugins/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css" rel="stylesheet" />
+	<link href="../assets/plugins/datatables.net-autofill-bs4/css/autofill.bootstrap4.min.css" rel="stylesheet" />
+	<link href="../assets/plugins/datatables.net-colreorder-bs4/css/colreorder.bootstrap4.min.css" rel="stylesheet" />
+	<link href="../assets/plugins/datatables.net-keytable-bs4/css/keytable.bootstrap4.min.css" rel="stylesheet" />
+	<link href="../assets/plugins/datatables.net-rowreorder-bs4/css/rowreorder.bootstrap4.min.css" rel="stylesheet" />
+	<link href="../assets/plugins/datatables.net-select-bs4/css/select.bootstrap4.min.css" rel="stylesheet" />
+		<script>
+			//if(!sessionStorage.getItem('TOKEN')) {window.location="login.html";}
+		</script>
+
+
+	</head>
+</head>
+
+<body>
+	<div class="container-fluid pt-3">
+		<div>
+			<nav class="navbar">
+				<ul>
+					<ul><a href="products.html">Products</a></ul>
+					<ul><a href="categories.html">Categories</a></ul>
+					<ul><a href="login.html">Login</a></ul>
+					<ul><a href="register.html">Register</a></ul>
+					<ul><a href="logout.html">Logout</a></ul>
+				</ul>
+			</nav>
+		</div>
+		<div class="row mb-3">
+			<div class="col-md-6 text-capitalize">
+				<h1>Categories Management</h2>
+			</div>
+			<div class="col-md-6 text-right"><button type="button" onclick="add_categories();"
+					class="btn btn-primary">Add Categories</button></div>
+			<div class="col-md-12">
+				<!-- <table class="table table-bordered table-striped" id="tbl_categories" style="width: 100%;"></table> -->
+			</div>
+		</div>
+	</div>
+
+
+	<button type="button" onclick="list_categories();">Allll</button>
+
+	<div class="col-xl-12">
+		<div class="panel panel-inverse">
+			<!-- begin panel-heading -->
+			<div class="panel-heading">
+				<h4 class="panel-title">DataTable - Extension Combination</h4>
+				<div class="panel-heading-btn">
+					<a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand"></i></a>
+					<a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-success" data-click="panel-reload"><i class="fa fa-redo"></i></a>
+					<a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
+					<a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-danger" data-click="panel-remove"><i class="fa fa-times"></i></a>
+				</div>
+			</div>
+			<!-- end panel-heading -->
+			<!-- begin panel-body -->
+			<div class="panel-body">
+				<table id="data-table-combine" class="table table-striped table-bordered table-td-valign-middle">
+					<thead>
+						<tr>
+							<th width="1%"></th>
+							
+							<th class="text-nowrap">Rendering engine</th>
+							<th class="text-nowrap">Browser</th>
+							<th class="text-nowrap">Browser</th>
+						</tr>
+					</thead>
+					<tbody id="ttb">
+						
+						
+						
+					</tbody>
+				</table>
+			</div>
+			<!-- end panel-body -->
+		</div>
+	</div>
+
+	
+	<!-- Modal Form -->
+	<form method="post" class="needs-validation" id="Category_form" action="http://127.0.0.1:8000/api/categories/save"
+		novalidate>
+
+		<div class="modal fade" tabindex="-1" role="dialog" id="modal_Category_form" data-backdrop="static">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="modal_Category_form_title">Add Categories</h5>
+						<button class="close" data-dismiss="modal">&times;</button>
+					</div>
+					<div class="modal-body">
+						<div class="row">
+							<input type="hidden" name="id" id="id" />
+							<div class="col-md-12 mb-3">
+								<label class="mb-2">Name</label>
+								<input type="text" name="name" id="name" class="form-control " required
+									placeholder="Enter name" />
+
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+						<button type="submit" class="btn btn-success" id="Category_form_btn">Save</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+
+
+	<!-- ================== BEGIN PAGE LEVEL JS ================== -->
+	<!-- Modal Form -->
+
+	<script >
+		
+		var tbl_categories;
+		 //document.addEventListener('load',list_categories()) ;
+		function show_categories() {
+			if (tbl_categories) {
+				tbl_categories.destroy();
+			}
+			tbl_samples = $('#tbl_categories').DataTable({
+				destroy: true,
+				pageLength: 10,
+				responsive: true,
+
+				ajax: {
+					url : "http://127.0.0.1:8000/api/categories/list", 
+					headers : {"Authorization":'Bearer ' +sessionStorage.getItem("TOKEN")},
+				},
+				
+				deferRender: true,
+				columns: [
+					{
+						className: '',
+						"data": 'id',
+						"title": 'ID',
+					},
+					{
+						className: '',
+						"data": 'name',
+						"title": 'Name',
+					},
+					{
+						className: 'width-option-1 text-center',
+						width: '15%',
+						"data": 'id',
+						"orderable": false,
+						"title": 'Options',
+						"render": function (data, type, row, meta) {
+							newdata = '';
+							newdata += '<button class="btn btn-success btn-sm font-base mt-1"  onclick="edit_categories(' + row.id + ')" type="button"><i class="fa fa-edit"></i></button> ';
+							newdata += ' <button class="btn btn-danger btn-sm font-base mt-1" onclick="delete_categories(' + row.id + ');" type="button"><i class="fa fa-trash"></i></button>';
+							return newdata;
+						}
+					}
+				]
+			});
+		}
+
+		function list_categories() {
+			$.ajax({
+				type: "GET",
+				url: "http://127.0.0.1:8000/api/categories/list",
+				data: {},
+				dataType: 'json',
+				headers : {"Authorization":'Bearer ' +sessionStorage.getItem("TOKEN")},
+				beforeSend: function () {
+				},
+				success: function (response) {
+					// console.log(response);
+					if (response.status == true) {
+						$('#ttb').html('');
+						response.data.forEach(element => {
+							$('#ttb').append(`
+							
+
+							<tr class="gradeU">
+							<td width="1%" class="f-s-600 text-inverse">${element.id}</td>
+							<td width="1%" class="with-img"><img src="../assets/img/user/user-1.jpg" class="img-rounded height-30" /></td>
+							<td>${element.name}</td>
+							<td><button class="btn btn-success btn-sm font-base mt-1"  onclick="edit_categories(${element.id})" type="button"><i class="fa fa-edit"></i></button>
+								<button class="btn btn-danger btn-sm font-base mt-1" onclick="delete_categories(${element.id});" type="button"><i class="fa fa-trash"></i></button>
+								</td>
+						</tr>
+							`);
+						});
+					} else {
+						console.log(response);
+					}
+				},
+				error: function (error) {
+					console.log(error);
+				}
+			});
+		}
+		$("#Category_form").on('submit', function (e) {
+			e.preventDefault();
+			let id = $('#id').val();
+			let url = $(this).attr('action');
+			let formData = $(this).serialize();
+			$.ajax({
+				type: "POST",
+				url: url + '/' + id,
+				data: formData,
+				headers : {"Authorization":'Bearer ' +sessionStorage.getItem("TOKEN")},
+				dataType: 'json',
+				beforeSend: function () {
+					$('#Category_form_btn').prop('disabled', true);
+				},
+				success: function (response) {
+					// console.log(response);
+					if (response.status == true) {
+						swal("Success", response.message, "success");
+						show_categories();
+						$('#modal_Category_form').modal('hide');
+					} else {
+						console.log(response);
+						//swal("warning",response.error.name[0] , "warning");
+					}
+					//validation('Category_form', response.error);
+					$('#Category_form_btn').prop('disabled', false);
+				},
+				error: function (error) {
+					$('#Category_form_btn').prop('disabled', false);
+					console.log(error);
+
+				}
+			});
+		});
+
+		function add_categories() {
+			$("#id").val('');
+			$('#name').val('');
+			$("#modal_Category_form").modal('show');
+		}
+
+
+		function edit_categories(id) {
+			$.ajax({
+				type: "GET",
+				url: "http://127.0.0.1:8000/api/categories/find/" + id,
+				data: {},
+				dataType: 'json',
+				headers : {"Authorization":'Bearer ' +sessionStorage.getItem("TOKEN")},
+				beforeSend: function () {
+				},
+				success: function (response) {
+					// console.log(response);
+					if (response.status == true) {
+						$('#id').val(response.data.id);
+						$('#name').val(response.data.name);
+						$('#modal_Category_form').modal('show');
+					} else {
+						console.log(response);
+					}
+				},
+				error: function (error) {
+					console.log(error);
+				}
+			});
+		}
+
+
+		function delete_categories(id) {
+
+			swal({
+				title: "Are you sure?",
+				text: "Do you want to delete categories?",
+				icon: "warning",
+				buttons: [
+					'No, cancel it!',
+					'Yes, I am sure!'
+				],
+				dangerMode: true,
+			}).then(function (isConfirm) {
+				if (isConfirm) {
+					$.ajax({
+						type: "GET",
+						url: "http://127.0.0.1:8000/api/categories/delete/" + id,
+						headers : {"Authorization":'Bearer ' +sessionStorage.getItem("TOKEN")},
+						data: {},
+						dataType: 'json',
+						beforeSend: function () {
+						},
+						success: function (response) {
+							// console.log(response);
+							if (response.status == true) {
+								show_categories();
+								swal("Success", response.message, "success");
+							} else {
+								console.log(response);
+							}
+						},
+						error: function (error) {
+							console.log(error);
+						}
+					});
+				}
+			});
+		}
+
+
+	</script>
+	<script src="../assets/js/app.min.js"></script>
+	<script src="../assets/js/theme/default.min.js"></script>
+	
+	
+	<!-- ================== END BASE JS ================== -->
+		<script src="../assets/plugins/datatables.net/js/jquery.dataTables.min.js"></script>
+	<script src="../assets/plugins/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+	<script src="../assets/plugins/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+	<script src="../assets/plugins/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
+	<script src="../assets/plugins/datatables.net-autofill/js/dataTables.autofill.min.js"></script>
+	
+	
+	<script src="../assets/plugins/datatables.net-autofill-bs4/js/autofill.bootstrap4.min.js"></script>
+	<script src="../assets/plugins/datatables.net-colreorder/js/dataTables.colreorder.min.js"></script>
+	
+	
+	<script src="../assets/plugins/datatables.net-colreorder-bs4/js/colreorder.bootstrap4.min.js"></script>
+	<script src="../assets/plugins/datatables.net-keytable/js/dataTables.keytable.min.js"></script>
+	<script src="../assets/plugins/datatables.net-keytable-bs4/js/keytable.bootstrap4.min.js"></script>
+	<script src="../assets/plugins/datatables.net-rowreorder/js/dataTables.rowreorder.min.js"></script>
+	<script src="../assets/plugins/datatables.net-rowreorder-bs4/js/rowreorder.bootstrap4.min.js"></script>
+	<script src="../assets/plugins/datatables.net-select/js/dataTables.select.min.js"></script>
+	<script src="../assets/plugins/datatables.net-select-bs4/js/select.bootstrap4.min.js"></script>
+	<script src="../assets/plugins/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+	<script src="../assets/plugins/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+	<script src="../assets/plugins/datatables.net-buttons/js/buttons.colVis.min.js"></script>
+	<script src="../assets/plugins/datatables.net-buttons/js/buttons.flash.min.js"></script>
+	<script src="../assets/plugins/datatables.net-buttons/js/buttons.html5.min.js"></script>
+	<script src="../assets/plugins/datatables.net-buttons/js/buttons.print.min.js"></script>
+	<script src="../assets/plugins/pdfmake/build/pdfmake.min.js"></script>
+	<script src="../assets/plugins/pdfmake/build/vfs_fonts.js"></script>
+	<script src="../assets/plugins/jszip/dist/jszip.min.js"></script>
+	<script src="../assets/js/demo/table-manage-combine.demo.js"></script>
+</body>
+
+</html>
